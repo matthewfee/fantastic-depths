@@ -1,6 +1,6 @@
-import { ChatFactory, CHAT_TYPE } from '/systems/fantastic-depths/module/chat/ChatFactory.mjs';
-import { FDItem } from '/systems/fantastic-depths/module/item/FDItem.mjs';
-import { TagManager } from '/systems/fantastic-depths/module/sys/TagManager.mjs';
+import { ChatFactory, CHAT_TYPE } from "/systems/fantastic-depths/module/chat/ChatFactory.mjs";
+import { FDItem } from "/systems/fantastic-depths/module/item/FDItem.mjs";
+import { TagManager } from "/systems/fantastic-depths/module/sys/TagManager.mjs";
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -20,7 +20,7 @@ export class GearItem extends FDItem {
    /** A getter for dynamically calculating the contained items.
     * This data is not stored in the database. */
    get containedItems() {
-      return this.parent?.items.filter(item => item.system.containerId === this.id) || [];
+      return this.parent?.items.filter((item) => item.system.containerId === this.id) || [];
    }
 
    get isContained() {
@@ -31,7 +31,10 @@ export class GearItem extends FDItem {
    get totalEnc() {
       let result = 0;
       if (this.system.container === true) {
-         result = this.containedItems?.reduce((sum, ritem) => { return sum + ritem.totalEnc }, 0) || 0;
+         result =
+            this.containedItems?.reduce((sum, ritem) => {
+               return sum + ritem.totalEnc;
+            }, 0) || 0;
       }
       let weight = this.system.weight ?? 0;
       if (this.system.equipped) {
@@ -74,33 +77,33 @@ export class GearItem extends FDItem {
       super.prepareDerivedData();
       if (this.system.quantity !== undefined) {
          const qty = this.system.quantity > 0 ? this.system.quantity : 0;
-         this.system.totalWeight = Math.round((this.system.weight * qty) * 100) / 100;
+         this.system.totalWeight = Math.round(this.system.weight * qty * 100) / 100;
          //console.debug(`${this.actor?.name}: ${this.name} total weight: ${this.system.totalWeight} (${qty}x${this.system.weight})`);
-         this.system.totalCost = Math.round((this.system.cost * qty) * 100) / 100;
+         this.system.totalCost = Math.round(this.system.cost * qty * 100) / 100;
       }
       // This can't be in data model, because name is a property of Item.
       this.system.unidentifiedName = this.system.unidentifiedName ?? this.name;
    }
 
    /**
-    * Handle clickable rolls. This is the default handler and subclasses override. If a subclass 
+    * Handle clickable rolls. This is the default handler and subclasses override. If a subclass
     * does not override this message the result is a chat message with the item description.
     * @param {dataset} event The data- tag values from the clicked element
     * @private
     */
    async roll(dataset) {
       const owner = dataset?.owneruuid ? foundry.utils.deepClone(await fromUuid(dataset.owneruuid)) : null;
-      const instigator = owner || this.actor?.currentActiveToken || canvas.tokens.controlled?.[0]?.document;
+      const instigator = owner || this.actor || this.actor?.prototypeToken || canvas.tokens.controlled?.[0]?.document || game.user.character || null;
       if (!instigator) {
-         ui.notifications.warn(game.i18n.localize('FADE.notification.noTokenAssoc'));
+         ui.notifications.warn(game.i18n.localize("FADE.notification.noTokenAssoc"));
          return null;
       }
       // Initialize chat data.
-      const rollMode = game.settings.get('core', 'rollMode');
+      const rollMode = game.settings.get("core", "rollMode");
       const chatData = {
          caller: this,
          context: instigator,
-         rollMode
+         rollMode,
       };
       const builder = new ChatFactory(CHAT_TYPE.ITEM_ROLL, chatData);
       return await builder.createChatMessage();

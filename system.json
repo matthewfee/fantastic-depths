@@ -1,55 +1,51 @@
 {
-  "id": "fantastic-depths",
-  "title": "Fantastic Depths",
-  "description": "The Fantastic Depths system for FoundryVTT!",
-  "authors": [
-    {
-      "name": "forelius",
-      "url": "https://github.com/Forelius",
-      "discord": "forelius",
-      "flags": {}
-    }
-  ],
-  "media": [
-    {
-      "type": "setup",
-      "url": "systems/fantastic-depths/assets/cover.webp",
-      "thumbnail": "systems/fantastic-depths/assets/cover.webp"
-    }
-  ],
-  "version": "#{VERSION}#",
-  "compatibility": {
-    "minimum": 12,
-    "verified": 13,
-    "maximum": 13
-  },
-  "esmodules": [
-    "module/fantastic-depths.mjs"
-  ],
-  "styles": [
-    "css/fantastic-depths.css"
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
-    }
-  ],
-  "packs": [],
-  "packFolders": [],
-  "socket": true,
-  "url": "#{URL}#",
-  "license": "LICENSE.txt",
-  "readme": "README.md",
-  "bugs": "https://github.com/Forelius/fantastic-depths/issues",
-  "manifest": "#{MANIFEST}#",
-  "download": "#{DOWNLOAD}#",
-  "changelog": "#{CHANGELOG}#",
-  "background": "systems/fantastic-depths/assets/cover.webp",
-  "grid": {
-    "distance": 5,
-    "units": "ft"
-  },
-  "primaryTokenAttribute": "hp"
+   "id": "fantastic-depths-white-box",
+   "title": "Fantastic Depths White Box",
+   "description": "The Fantastic Depths system for FoundryVTT!",
+   "authors": [
+      {
+         "name": "forelius",
+         "url": "https://github.com/Forelius",
+         "discord": "forelius",
+         "flags": {}
+      }
+   ],
+   "media": [
+      {
+         "type": "setup",
+         "url": "systems/fantastic-depths/assets/cover.webp",
+         "thumbnail": "systems/fantastic-depths/assets/cover.webp"
+      }
+   ],
+   "version": "#{VERSION}#",
+   "compatibility": {
+      "minimum": 12,
+      "verified": 13,
+      "maximum": 13
+   },
+   "esmodules": ["module/fantastic-depths.mjs"],
+   "styles": ["css/fantastic-depths.css"],
+   "languages": [
+      {
+         "lang": "en",
+         "name": "English",
+         "path": "lang/en.json"
+      }
+   ],
+   "packs": [],
+   "packFolders": [],
+   "socket": true,
+   "url": "#{URL}#",
+   "license": "LICENSE.txt",
+   "readme": "README.md",
+   "bugs": "https://github.com/Forelius/fantastic-depths/issues",
+   "manifest": "#{MANIFEST}#",
+   "download": "#{DOWNLOAD}#",
+   "changelog": "#{CHANGELOG}#",
+   "background": "systems/fantastic-depths/assets/cover.webp",
+   "grid": {
+      "distance": 5,
+      "units": "ft"
+   },
+   "primaryTokenAttribute": "hp"
 }

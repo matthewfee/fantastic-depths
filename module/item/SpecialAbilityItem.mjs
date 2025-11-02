@@ -43,27 +43,29 @@ export class SpecialAbilityItem extends FDItem {
       }
 
       if (hasDamage) {
-         damageType = isHeal ? "heal" : (this.system.damageType == "" ? "physical" : this.system.damageType);
+         damageType = isHeal ? "heal" : this.system.damageType == "" ? "physical" : this.system.damageType;
       }
 
       return hasDamage ? { damageFormula, damageType, digest, hasDamage } : null;
    }
 
    /**
-   * Handle clickable rolls.
-   * @param {Event} event The originating click event
-   * @private
-   */
+    * Handle clickable rolls.
+    * @param {Event} event The originating click event
+    * @private
+    */
    async roll(dataset, dialogResp = null, event = null) {
       let result = null;
       const itemSystem = this.system;
       const owner = dataset.owneruuid ? foundry.utils.deepClone(await fromUuid(dataset.owneruuid)) : null;
-      const instigator = owner || this.actor?.token || canvas.tokens.controlled?.[0];
+      const instigator = owner || this.actor || this.actor?.prototypeToken || canvas.tokens.controlled?.[0]?.document || game.user.character || null;
+
       if (!instigator) {
-         ui.notifications.warn(game.i18n.localize('FADE.notification.noTokenAssoc'));
+         ui.notifications.warn(game.i18n.localize("FADE.notification.noTokenAssoc"));
          return result;
       }
-      const instigatorData = instigator.actor ? instigator.actor.system : instigator.document.actor.system;
+      const instigatorData = instigator?.system ?? instigator?.actor?.system ?? instigator?.document?.actor?.system ?? null;
+
       const actionItem = dataset.actionuuid ? foundry.utils.deepClone(await fromUuid(dataset.actionuuid)) : null;
       let canProceed = true;
       const hasRoll = itemSystem.rollFormula != null && itemSystem.rollFormula != "" && itemSystem.target != null && itemSystem.target != "";
@@ -74,7 +76,7 @@ export class SpecialAbilityItem extends FDItem {
       let roll = null;
       let digest = [];
 
-      if (await this._tryUseChargeThenUsage(true, actionItem) === false) {
+      if ((await this._tryUseChargeThenUsage(true, actionItem)) === false) {
          canProceed = false;
       } else if (hasRoll === true) {
          // Retrieve roll data.
@@ -84,13 +86,13 @@ export class SpecialAbilityItem extends FDItem {
          dataset.label = this.name;
 
          if (dialogResp) {
-            dialogResp.rolling === true
+            dialogResp.rolling === true;
          } else if (ctrlKey === true) {
             dialogResp = {
                rolling: true,
                mod: 0,
                formula: itemSystem.rollFormula,
-               editFormula: game.user.isGM
+               editFormula: game.user.isGM,
             };
          } else {
             dialogResp = await DialogFactory(dataset, instigator);
@@ -110,17 +112,17 @@ export class SpecialAbilityItem extends FDItem {
                   abilityMod = -abilityMod;
                }
             }
-            const itemMod = (Number(dataset.mod) || 0);
+            const itemMod = Number(dataset.mod) || 0;
             if (itemMod != 0) {
                digest.push(game.i18n.format("FADE.Chat.rollMods.itemMod", { mod: itemMod }));
             }
-            const manualMod = (Number(dialogResp.mod) || 0);
+            const manualMod = Number(dialogResp.mod) || 0;
             if (manualMod != 0) {
                digest.push(game.i18n.format("FADE.Chat.rollMods.manual", { mod: manualMod }));
             }
             dialogResp.mod = itemMod + manualMod + abilityMod;
             rollData.formula = Number(dialogResp?.mod) != 0 ? `${dialogResp?.formula}+@mod` : `${dialogResp?.formula}`;
-            const rollContext = { ...rollData, ...dialogResp || {} };
+            const rollContext = { ...rollData, ...(dialogResp || {}) };
             roll = await new Roll(rollData.formula, rollContext);
          } else {
             canProceed = false;
@@ -137,7 +139,7 @@ export class SpecialAbilityItem extends FDItem {
             resp: dialogResp,
             context: instigator,
             roll,
-            digest
+            digest,
          };
          const builder = new ChatFactory(CHAT_TYPE.SPECIAL_ABILITY, chatData, { showResult });
          result = builder.createChatMessage();

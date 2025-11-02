@@ -1,4 +1,4 @@
-import { ChatFactory, CHAT_TYPE } from '/systems/fantastic-depths/module/chat/ChatFactory.mjs';
+import { ChatFactory, CHAT_TYPE } from "/systems/fantastic-depths/module/chat/ChatFactory.mjs";
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -17,48 +17,50 @@ export class FDItem extends Item {
    /** A getter for dynamically calculating the contained items.
     * This data is not stored in the database. */
    get containedItems() {
-      return this.parent?.items.filter(item => item.system.containerId === this.id) || [];
+      return this.parent?.items.filter((item) => item.system.containerId === this.id) || [];
    }
    /** Returns true if this item type shows selected targets on its chat card, otherwise false. */
    get hasTargets() {
       return false; // The item itself does not have targets.
    }
-   get canMelee() { return this.system.canMelee === true }
-   get canShoot() { return this.system.canRanged === true && (this.system.ammoType?.length ?? 0) > 0; }
-   get canThrow() { return this.system.canRanged === true && (this.system.ammoType?.length ?? 0) === 0; }
+   get canMelee() {
+      return this.system.canMelee === true;
+   }
+   get canShoot() {
+      return this.system.canRanged === true && (this.system.ammoType?.length ?? 0) > 0;
+   }
+   get canThrow() {
+      return this.system.canRanged === true && (this.system.ammoType?.length ?? 0) === 0;
+   }
    /** Returns true if the item uses charges and either there are charges remaining or there are infinite charges (chargesMax === null). */
-   get hasCharge() { return this.system.charges !== undefined && (this.system.charges > 0 || this.system.chargesMax === null); }
+   get hasCharge() {
+      return this.system.charges !== undefined && (this.system.charges > 0 || this.system.chargesMax === null);
+   }
    /** Returns true if the item uses quantity and either there are uses remaining or there are infinite uses (quantityMax === null). */
-   get hasUse() { return this.system.quantity !== undefined && (this.system.quantity > 0 || this.system.quantityMax === null); }
+   get hasUse() {
+      return this.system.quantity !== undefined && (this.system.quantity > 0 || this.system.quantityMax === null);
+   }
    /** Returns true if this item either has available casts or has infinite casts, otherwise false. */
    get hasCast() {
       return this.system.cast !== undefined && (this.system.cast < this.system.memorized || this.system.memorized === null);
    }
    /** The name of the item as known by the players. */
    get knownName() {
-      return this.system.isIdentified === undefined || this.system.isIdentified === true
-         ? this.name
-         : this.system.unidentifiedName;
+      return this.system.isIdentified === undefined || this.system.isIdentified === true ? this.name : this.system.unidentifiedName;
    }
    /** The name of the item as known by the players or user is GM. */
    get knownNameGM() {
-      return this.system.isIdentified === undefined || this.system.isIdentified === true || game.user.isGM === true
-         ? this.name
-         : this.system.unidentifiedName;
+      return this.system.isIdentified === undefined || this.system.isIdentified === true || game.user.isGM === true ? this.name : this.system.unidentifiedName;
    }
    /** If object needs is identifiable then the unidentified name, otherwise the name. */
    get unknownName() {
       return this.system.unidentifiedName ?? this.name;
    }
    get knownDescription() {
-      return this.system.isIdentified === undefined || this.system.isIdentified === true
-         ? this.system.description ?? ""
-         : this.system.unidentifiedDesc;
+      return this.system.isIdentified === undefined || this.system.isIdentified === true ? (this.system.description ?? "") : this.system.unidentifiedDesc;
    }
    get knownDescriptionGM() {
-      return this.system.isIdentified === undefined || this.system.isIdentified === true || game.user.isGM === true
-         ? this.system.description ?? ""
-         : this.system.unidentifiedDesc;
+      return this.system.isIdentified === undefined || this.system.isIdentified === true || game.user.isGM === true ? (this.system.description ?? "") : this.system.unidentifiedDesc;
    }
    get isIdentified() {
       return this.system.isIdentified === undefined || this.system.isIdentified === true;
@@ -68,7 +70,7 @@ export class FDItem extends Item {
     * @protected */
    prepareBaseData() {
       super.prepareBaseData();
-      if (this.type === 'treasure') {
+      if (this.type === "treasure") {
          this.system.quantityMax = 0;
       }
    }
@@ -88,7 +90,7 @@ export class FDItem extends Item {
          class: `${fdPath}/class.webp`,
          weaponMastery: "icons/svg/combat.svg",
          light: "icons/sundries/lights/lantern-iron-lit-yellow.webp",
-         condition: "icons/svg/paralysis.svg"
+         condition: "icons/svg/paralysis.svg",
       };
    }
 
@@ -130,7 +132,7 @@ export class FDItem extends Item {
          relativeTo: this.actor,
       });
       if (description?.length <= 0) {
-         description = '--';
+         description = "--";
       }
       return description;
    }
@@ -140,26 +142,26 @@ export class FDItem extends Item {
    }
 
    /**
-    * Handle clickable rolls. This is the default handler and subclasses override. If a subclass 
+    * Handle clickable rolls. This is the default handler and subclasses override. If a subclass
     * does not override this message the result is a chat message with the item description.
     * @public
     * @param {dataset} dataset The data- tag values from the clicked element
     */
    async roll(dataset) {
       const owner = dataset.owneruuid ? foundry.utils.deepClone(await fromUuid(dataset.owneruuid)) : null;
-      const instigator = owner || this.actor?.currentActiveToken || canvas.tokens.controlled?.[0]?.document;
+      const instigator = owner ?? canvas.tokens.controlled?.[0]?.actor ?? canvas.tokens.controlled?.[0]?.document?.actor;
       if (!instigator) {
-         ui.notifications.warn(game.i18n.localize('FADE.notification.noTokenAssoc'));
+         ui.notifications.warn(game.i18n.localize("FADE.notification.noTokenAssoc"));
          return null;
       }
 
       // Initialize chat data.
       //const speaker = ChatMessage.getSpeaker({ actor: this.actor });
-      const rollMode = game.settings.get('core', 'rollMode');
+      const rollMode = game.settings.get("core", "rollMode");
       const chatData = {
          caller: this,
          context: instigator,
-         rollMode
+         rollMode,
       };
       const builder = new ChatFactory(CHAT_TYPE.GENERIC_ROLL, chatData);
       return await builder.createChatMessage();
@@ -179,8 +181,7 @@ export class FDItem extends Item {
             const roll = new Roll(formula, rollData);
             await roll.evaluate(options);
             result = roll;
-         }
-         catch (error) {
+         } catch (error) {
             if (game.user.isGM === true) {
                console.error(`Invalid roll formula for ${this.name}. Formula='${formula}''. Owner=${this.parent?.name}`, error);
             }
@@ -203,8 +204,7 @@ export class FDItem extends Item {
             const roll = new Roll(formula, rollData);
             roll.evaluateSync(options);
             result = roll;
-         }
-         catch (error) {
+         } catch (error) {
             if (game.user.isGM === true) {
                console.error(`Invalid roll formula for ${this.name}. Formula='${formula}''. Owner=${this.parent?.name}`, error);
             }
@@ -230,8 +230,8 @@ export class FDItem extends Item {
 
       // Apply Active Effects only if transfer is false
       const changes = this.effects
-         .filter(effect => !effect.disabled && effect.transfer === false) // Only local effects
-         .flatMap(effect => effect.changes);
+         .filter((effect) => !effect.disabled && effect.transfer === false) // Only local effects
+         .flatMap((effect) => effect.changes);
 
       // Process changes
       for (const change of changes) {
@@ -325,9 +325,9 @@ export class FDItem extends Item {
       }
       // If there are no charges remaining, show a UI notification
       if (result === false) {
-         const message = game.i18n.format('FADE.notification.noCharges', { itemName: item.knownName });
+         const message = game.i18n.format("FADE.notification.noCharges", { itemName: item.knownName });
          ui.notifications.warn(message);
-         ChatMessage.create({ content: message, speaker: { alias: item.actor.name, } });
+         ChatMessage.create({ content: message, speaker: { alias: item.actor.name } });
       }
 
       return result;
@@ -353,7 +353,7 @@ export class FDItem extends Item {
       }
       // If there are no usages remaining, show a UI notification
       if (result === false) {
-         const message = game.i18n.format('FADE.notification.zeroQuantity', { itemName: item.name });
+         const message = game.i18n.format("FADE.notification.zeroQuantity", { itemName: item.name });
          ui.notifications.warn(message);
          ChatMessage.create({ content: message, speaker: { alias: item.actor.name } });
       }
