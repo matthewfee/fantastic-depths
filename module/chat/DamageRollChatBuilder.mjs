@@ -1,9 +1,9 @@
-import { DialogFactory } from '../dialog/DialogFactory.mjs';
-import { ChatBuilder } from './ChatBuilder.mjs';
+import { DialogFactory } from "../dialog/DialogFactory.mjs";
+import { ChatBuilder } from "./ChatBuilder.mjs";
 import { CodeMigrate } from "/systems/fantastic-depths/module/sys/migration.mjs";
 
 export class DamageRollChatBuilder extends ChatBuilder {
-   static template = 'systems/fantastic-depths/templates/chat/damage-roll.hbs';
+   static template = "systems/fantastic-depths/templates/chat/damage-roll.hbs";
 
    async getRollContent(roll, mdata) {
       return roll.render();
@@ -30,7 +30,7 @@ export class DamageRollChatBuilder extends ChatBuilder {
          damage: options.damage,
          showApplyDamage: options.showApplyDamage,
          attackName: options.attackName,
-         digest
+         digest,
       };
 
       if (game.fade.toastManager) {
@@ -40,24 +40,26 @@ export class DamageRollChatBuilder extends ChatBuilder {
       // Render the content using the template, now with messageId
       let content = await CodeMigrate.RenderTemplate(this.template, renderData);
       const chatMessageData = this.getChatMessageData({
-         content, rolls, rollMode,
+         content,
+         rolls,
+         rollMode,
          [`flags.${game.system.id}.attackdata`]: {
             mdata,
-            damage: options.damage
-         }
+            damage: options.damage,
+         },
       });
       await ChatMessage.create(chatMessageData);
    }
 
    /**
-   * Click event handler for damage/heal roll buttons.
-   * @param {any} event
-   */
+    * Click event handler for damage/heal roll buttons.
+    * @param {any} event
+    */
    static async clickDamageRoll(event) {
       const element = event.currentTarget;
       const dataset = element.dataset;
 
-      // Custom behavior for damage rolls      
+      // Custom behavior for damage rolls
       if (dataset.type === "damage" || dataset.type === "heal") {
          event.preventDefault(); // Prevent the default behavior
          event.stopPropagation(); // Stop other handlers from triggering the event
@@ -77,9 +79,10 @@ export class DamageRollChatBuilder extends ChatBuilder {
       const targetActor = targetactoruuid ? await fromUuid(targetactoruuid) : undefined;
       const damagerItem = await fromUuid(weaponuuid);
       const owner = owneruuid ? await fromUuid(owneruuid) : undefined;
-      const instigator = owner || damagerItem.actor?.currentActiveToken;
+      const instigator = owner || this.actor || this.actor?.prototypeToken || canvas.tokens.controlled?.[0]?.document || game.user.character || null;
+
       if (!instigator) {
-         ui.notifications.warn(game.i18n.localize('FADE.notification.noTokenAssoc'));
+         ui.notifications.warn(game.i18n.localize("FADE.notification.noTokenAssoc"));
          return result;
       }
       let rolling = true;
@@ -97,12 +100,15 @@ export class DamageRollChatBuilder extends ChatBuilder {
       }
 
       if (damageRoll) {
-         dialogResp = await DialogFactory({
-            dialog: "generic",
-            label: isHeal ? "Heal" : "Damage",
-            formula: damageRoll.damageFormula,
-            editFormula: game.user.isGM
-         }, damagerItem);
+         dialogResp = await DialogFactory(
+            {
+               dialog: "generic",
+               label: isHeal ? "Heal" : "Damage",
+               formula: damageRoll.damageFormula,
+               editFormula: game.user.isGM,
+            },
+            damagerItem
+         );
          rolling = dialogResp != null;
 
          if (weaponDamageTypes.includes(dataset.damagetype)) {
@@ -120,16 +126,16 @@ export class DamageRollChatBuilder extends ChatBuilder {
             const descData = {
                attacker: instigator.name,
                weapon: attackName,
-               damage
+               damage,
             };
-            const resultString = isHeal ? game.i18n.format('FADE.Chat.healFlavor', descData) : game.i18n.format('FADE.Chat.damageFlavor2', descData);
+            const resultString = isHeal ? game.i18n.format("FADE.Chat.healFlavor", descData) : game.i18n.format("FADE.Chat.damageFlavor2", descData);
             dataset.desc = dataset.desc ? dataset.desc : resultString;
 
             const chatData = {
                context: instigator,
                mdata: dataset,
                roll,
-               digest: damageRoll.digest
+               digest: damageRoll.digest,
             };
             const options = {
                damage,
@@ -160,11 +166,11 @@ export class DamageRollChatBuilder extends ChatBuilder {
       if (hasTarget && hasSelected) {
          const dialogResp = await DialogFactory({
             dialog: "yesno",
-            title: game.i18n.localize('FADE.dialog.applyToPrompt'),
-            content: game.i18n.localize('FADE.dialog.applyToPrompt'),
-            yesLabel: game.i18n.localize('FADE.dialog.targeted'),
-            noLabel: game.i18n.localize('FADE.dialog.selected'),
-            defaultChoice: "yes"
+            title: game.i18n.localize("FADE.dialog.applyToPrompt"),
+            content: game.i18n.localize("FADE.dialog.applyToPrompt"),
+            yesLabel: game.i18n.localize("FADE.dialog.targeted"),
+            noLabel: game.i18n.localize("FADE.dialog.selected"),
+            defaultChoice: "yes",
          });
 
          if (dialogResp?.resp?.result == undefined) {
@@ -183,7 +189,7 @@ export class DamageRollChatBuilder extends ChatBuilder {
       } else if (hasSelected) {
          applyTo = selected;
       } else {
-         ui.notifications.warn(game.i18n.localize('FADE.notification.noTokenWarning'));
+         ui.notifications.warn(game.i18n.localize("FADE.notification.noTokenWarning"));
       }
 
       // Ensure we have a target ID
